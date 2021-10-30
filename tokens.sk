@@ -1,0 +1,87 @@
+options:
+    prefix: &3&lVibrant&b&lGN &8¬&7
+    messageborders: &8&m                                                  &r
+
+every 30 seconds:
+    set {tokens::tokenstop::*} to sorted {tokens::players::tcount::*} from highest to lowest
+
+function PlaySound(p: player, sound: string, cout: integer = 2):
+    play sound {_sound} with volume {_cout} to {_p}
+
+command /tokens [<string>] [<player>] [<integer>]:
+    trigger:
+        if arg-1 = "pay":
+            if arg-2 is set:
+                if arg-3 is set:
+                    if arg-3 > 0:
+                        if {tokens::players::tcount::%uuid of player%} >= arg-3:
+                            remove arg-3 from {tokens::players::tcount::%uuid of player%}
+                            add arg-3 to {tokens::players::tcount::%uuid of arg-2%}
+                            send action bar "{@prefix} &3%name of player% &bhas payed you &3%arg-3% &btokens" to arg-2
+                            PlaySound(arg-2, "ENTITY_VILLAGER_YES")
+                            send action bar "{@prefix} You sent &3%arg-3% &bto &3%arg-2%'s &btoken balance!" to player
+                            PlaySound(player, "ENTITY_VILLAGER_NO")
+                        else:
+                            send action bar "{@prefix} You don't have enough tokens to pay this amount to &3%arg-2%..." to player
+                    else:
+                        send action bar "{@prefix} You can't steal tokens from another player..." to player
+                else:
+                    send action bar "{@prefix} Please supply more arguments..." to player
+            else:
+                send action bar "{@prefix} Please supply more arguments..." to player
+        if arg-1 = "shop":
+            open chest inventory with 3 rows named "&3Tokens Shop" to player
+            loop 27 times:
+                format gui slot (loop-number - 1) of player with pink stained glass pane named " "
+            format gui slot 13 of player with gold block named "&3Gen Slot" with lore "" and "&bPrice: &3500 Tokens" to run:
+                if {tokens::players::tcount::%uuid of player%} >= 500:
+                    remove 500 from {tokens::players::tcount::%uuid of player%}
+                    console command "givegenvoucher %player% 1"
+                    PlaySound(player, "ENTITY_VILLAGER_YES")
+                    send action bar "{@prefix} You bought an extra genslot" to player
+                else:
+                    close inventory of player
+                    PlaySound(player, "ENTITY_VILLAGER_NO")
+                    send action bar "{@prefix} You don't have &3500 &btokens..." to player
+        if arg-1 = "top":
+            send "&r" to player
+            send "{@messageborders}" to player
+            send "&3&lTOKENS TOP" to player
+            send "&r" to player
+            set {_num} to 0
+            loop {tokens::tokenstop::*}:
+                add 1 to {_num}
+                set {_data::*} to split loop-value by "^"
+                set {_player} to "%{_data::1}%" parsed as offline player
+                set {_tokens} to {_data::2}
+                send "&7##%{_num}% - &3%{_player}% &bwith &3%{_tokens}% &btokens" to player
+                wait 1 tick
+                if {_num} >= 5:
+                    stop loop
+            send "{@messageborders}" to player
+        if arg-1 is not set:
+            send "&r" to player
+            send "{@messageborders}" to player
+            send "&3&lTOKENS HELP" to player
+            send "&r" to player
+            send "&3/tokens pay playername amount &7- &bWanna pay someone tokens? You can do it using the command." to player
+            send "&3/tokens shop &7- &bSpend your tokens on more gen slots or multipliers!" to player
+            send "&3/tokens top &7- &bTokens Leaderboard"
+            send "{@messageborders}" to player
+
+
+command /addtokens [<player>] [<integer>]:
+    permission: *
+    trigger:
+        set {_u} to arg-1's uuid
+        set {_n} to arg-2
+        add {_n} to {tokens::players::tcount::%{_u}%}
+        send "Added %{_n}% to %player%'s tokens"
+
+command /removetokens [<player>] [<integer>]:
+    permission: *
+    trigger:
+        set {_u} to arg-1's uuid
+        set {_n} to arg-2
+        remove {_n} from {tokens::players::tcount::%{_u}%}
+        send "Removed %{_n}% to %player%'s tokens"

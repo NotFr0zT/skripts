@@ -1,0 +1,61 @@
+options:
+    message_prefix: &b&lRECLAIM &7
+
+#ReclaimDonatorPerks
+command /reclaim:
+    trigger:
+        if player does not have permission "bedrock", "obsidian", "emerald", "diamond", "gold", "iron" or "coal":
+            send "{@message_prefix} It appears your rank can't be reclaimed! If you think this is a mistake, please contact the developers in /discord"
+        if {player_reclaimed::%uuid of player%} is not set:
+            set {player_reclaimed::%uuid of player%} to true
+            broadcast "{@message_prefix} &f%player% &dreclaimed their donator perks! &f/buy"
+            if player has permission "bedrock":
+                add 250 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+            if player has permission "obsidian":
+                add 150 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+            if player has permission "emerald":
+                add 100 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+            if player has permission "diamond":
+                add 75 to {gens::playerData::%player's uuid%::genSlots} 
+                stop
+            if player has permission "gold":
+                add 60 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+            if player has permission "iron":
+                add 50 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+            if player has permission "coal":
+                add 40 to {gens::playerData::%player's uuid%::genSlots}
+                stop
+        else if {player_reclaimed::%uuid of player%} is set:
+            send "{@message_prefix} &cYou already claimed your reclaim this season!" to player
+            stop
+
+# command /staffchat [<string>]:
+#     aliases: /sc
+#     permission: staff.chat
+#     trigger:
+#         send "&8(&6&lSC&8) &d%uncoloured player's prefix%&7%uncoloured player's displayname%: &f%arg-1%" to all players where [input has permission "staff.chat"]
+
+# on chat:
+#     message starts with "## "
+#     player has permission "staff.chat"
+#     cancel event
+#     set {_msg} to message
+#     replace "## " in {_msg} with ""
+#     send "&8(&6&lSC&8) &d%uncoloured player's prefix%&7%uncoloured player's displayname%: &f%{_msg}%" to all players where [input has permission "staff.chat"]
+
+command /resetreclaim [<offline player>]:
+    permission: *
+    trigger:
+        delete {player_reclaimed::%uuid of arg-1%}
+        send "done"
+
+command /resetallreclaim:
+    permission: *
+    trigger:
+        delete {player_reclaimed::*}
+        send "done"

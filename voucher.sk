@@ -1,0 +1,134 @@
+
+options:
+    prefix: &b&lVIBRANT&f&lGN &8>&7
+    messageborders: &8&m                                                  &r
+
+function getRankAndGiveGenSlots(p: player, rank: text):
+    set {_rnk} to lowercase {_rank}
+    if {_rnk} = "coal":
+        if {_p} has permission "coal", "iron", "gold", "diamond", "emerald", "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 40"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "iron":
+        if {_p} has permission "iron", "gold", "diamond", "emerald", "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 50"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "gold":
+        if {_p} has permission "gold", "diamond", "emerald", "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 60"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "diamond":
+        if {_p} has permission "diamond", "emerald", "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 75"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "emerald":
+        if {_p} has permission "emerald", "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 100"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "obsidian":
+        if {_p} has permission "obsidian" or "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 150"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    if {_rnk} = "bedrock":
+        if {_p} has permission "bedrock":
+            send "{@prefix} You already has this rank or a better one." to {_p}
+            stop
+        else:
+            execute console command "gen addSlots %{_p}% 250"
+            send "{@prefix} You claimed &b%{_rnk} in proper case%&7!" to {_p}
+    # validaterank({_p}, {_rank})
+
+command /giverankvoucher [<player>] [<string>]:
+    permission: *
+    trigger:
+        set {_item} to paper with nbt "{rank:""%arg-2%""}" named "&bRank Voucher"
+        set lore of {_item} to "&bRank: &f%proper case arg-2%" and "&bGiver: &f%sender%"
+        give arg-1 {_item}
+
+command /givegenvoucher [<player>] [<integer>]:
+    permission: *
+    trigger:
+        set {_item} to paper with nbt "{slots:""%arg-2%""}" named "&bGen Slots Voucher"
+        set lore of {_item} to "&bSlots: &f%arg-2%" and "&bGiver: &f%sender%"
+        give arg-1 {_item}
+
+# command /givemultivoucher [<player>] [<number>]:
+#     permission: *
+#     trigger:
+#         set {_item} to paper with nbt "{multiplier:""%arg-2%""}" named "&bMultiplier Voucher"
+#         set lore of {_item} to "&bMultiplier: &f%arg-2%&bGiver: &f%sender%"
+#         give arg-1 {_item}
+
+command /givemoneyvoucher [<player>] [<number>]:
+    permission: *
+    trigger:
+        set {_item} to paper with nbt "{money:""%arg-2%""}" named "&bMoney Voucher"
+        set lore of {_item} to "&bMoney: &f%arg-2%" and "&bGiver: &f%sender%"
+        give arg-1 {_item}
+
+command /givekitvoucher [<player>] [<string>]:
+    permission: *
+    trigger:
+        set {_item} to paper with nbt "{kit:""%arg-2%""}" named "&bKit Voucher"
+        set lore of {_item} to "&bKit: &f%arg-2%" and "&bGiver: &f%sender%"
+        give arg-1 {_item}
+
+
+on right click with paper:
+    set {_tag} to tag "rank" of nbt of player's tool
+    {_tag} is set
+    getRankAndGiveGenSlots(player, {_tag})
+    execute console command "/lp user %player% parent add %{_tag}%"
+    wait 1 tick
+    remove 1 of event-item from inventory of player
+    add {_tag} to {reset_rank::%uuid of player%::*}
+
+on right click with paper:
+    set {_tag} to tag "slots" of nbt of player's tool
+    {_tag} is set
+    set {_gens} to {_tag} parsed as an integer
+    add {_gens} to {gens::playerData::%player's uuid%::genSlots}
+    wait 1 tick
+    remove 1 of event-item from inventory of player
+
+# on right click with paper:
+#     set {_tag} to tag "multiplier" of nbt of player's tool
+#     {_tag} is set
+#     set {_multi} to {_tag} parsed as an number
+#     add {_multi} to {shop::multiplier::%uuid of player%}
+#     wait 1 tick
+#     remove 1 of event-item from inventory of player
+
+on right click with paper:
+    set {_nbt} to nbt of player's tool
+    set {_tag} to tag "money" of nbt of player's tool
+    {_tag} is set
+    set {_money} to {_tag} parsed as an number
+    add {_money} to player's balance
+    wait 1 tick
+    remove 1 of event-item from inventory of player
+
+on right click with paper:
+    set {_tag} to tag "kit" of nbt of player's tool
+    {_tag} is set
+    console command "kit %{_tag}% %player%"
+    wait 1 tick
+    remove 1 of event-item from inventory of player
